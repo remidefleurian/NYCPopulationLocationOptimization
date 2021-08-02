@@ -7,7 +7,7 @@ from copy import deepcopy
 from shapely import wkt
 
 g = Graph.Load(
-    r'C:\Users\PC\PycharmProjects\NYCPopulationLocationOptimization\V3\graphFiles\nyc_graph_2_unitsPerEdge.graphml',
+    r'graphFiles/nyc_graph_2_unitsPerEdge.graphml',
     format='graphml')
 for e in g.es:
     e['length'] = int(round(float(e['length'])))
@@ -20,7 +20,7 @@ def generate_ego_graph(vtx, graph):
                                      weights='length', mode='all')[0]
     vert_distances_dict = {}
     for vert, dist in zip(graph.vs, distances):
-        if dist <= 805:
+        if dist <= 402:
             vert_distances_dict[vert.index] = dist
     if list(vert_distances_dict.keys()):
         ego_graph = graph.induced_subgraph(list(vert_distances_dict.keys()))
@@ -39,7 +39,7 @@ def sum_edge_weights(ego_graph, weight='AdjUnitsRes'):
 def calculate_node_weight(vtx):
     ego_graph = generate_ego_graph(vtx, g)
     ew_sum = sum_edge_weights(ego_graph)
-    g.vs[vtx]['UnitsWithinHalfMile'] = ew_sum
+    g.vs[vtx]['UnitsWithinQuarterMile'] = ew_sum
     print("  Node", vtx)
 
 
@@ -49,13 +49,13 @@ if __name__ == '__main__':
     for vertex in range(len(g.vs())):
         calculate_node_weight(vertex)
     print("Saving new graph with node weights to file, so that we don't have to do this again.")
-    g.save(r'C:\Users\PC\PycharmProjects\NYCPopulationLocationOptimization\V3\graphFiles\nyc_graph_3_unitsPerNode.graphml', format='graphml')
+    g.save(r'graphFiles/nyc_graph_3_unitsPerNode.graphml', format='graphml')
 
-    print("Loading newly created graphml, now with 'UnitsWithinHalfMile' as an available attribute.")
-    g = nx.read_graphml(r'C:\Users\PC\PycharmProjects\NYCPopulationLocationOptimization\V3\graphFiles\nyc_graph_3_unitsPerNode.graphml')
+    print("Loading newly created graphml, now with 'UnitsWithinQuarterMile' as an available attribute.")
+    g = nx.read_graphml(r'graphFiles/nyc_graph_3_unitsPerNode.graphml')
     print("Adjusting graph attributes for plotting using osmnx.")
     nyc_graph = nx.read_graphml(
-        r'C:\Users\PC\PycharmProjects\NYCPopulationLocationOptimization\V3\graphFiles\nyc_graph_1.graphml')
+        r'graphFiles/nyc_graph_1.graphml')
     nyc_graph.to_undirected()
     nyc_graph.remove_edges_from(list(nyc_graph.edges()))
     nyc_graph.remove_nodes_from(list(nyc_graph.nodes()))
@@ -77,12 +77,12 @@ if __name__ == '__main__':
         G.nodes[node[0]]['geometry'] = wkt.loads(node[1]['geometry'])
         G.nodes[node[0]]['x'] = G.nodes[node[0]]['geometry'].x
         G.nodes[node[0]]['y'] = G.nodes[node[0]]['geometry'].y
-        G.nodes[node[0]]['UnitsWithinHalfMile'] = node[1]['UnitsWithinHalfMile']
+        G.nodes[node[0]]['UnitsWithinQuarterMile'] = node[1]['UnitsWithinQuarterMile']
 
     print("Now generating a heatmap showing residential units within "
           "a half-mile's walking distance of every intersection in Manhattan.")
     nyc_graph = G
-    nc = ox.plot.get_node_colors_by_attr(nyc_graph, 'UnitsWithinHalfMile', cmap='hot_r', start=0, stop=.75)
+    nc = ox.plot.get_node_colors_by_attr(nyc_graph, 'UnitsWithinQuarterMile', cmap='hot_r', start=0, stop=.75)
     ox.plot_graph(nyc_graph, node_size=1, node_color=nc, save=True,
                   filepath='imageFiles/ManhattanIntersectionHeatmap.png', dpi=800)
     print("Done!")

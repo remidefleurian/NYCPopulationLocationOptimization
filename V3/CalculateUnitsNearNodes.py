@@ -45,11 +45,11 @@ def calculate_node_weight(vtx):
 
 if __name__ == '__main__':
 
-    print(f"Calculating number of residential units within a half-mile's walking distance of {len(g.vs())} nodes.")
-    for vertex in range(len(g.vs())):
-        calculate_node_weight(vertex)
-    print("Saving new graph with node weights to file, so that we don't have to do this again.")
-    g.save(r'graphFiles/nyc_graph_3_unitsPerNode.graphml', format='graphml')
+    # print(f"Calculating number of residential units within a half-mile's walking distance of {len(g.vs())} nodes.")
+    # for vertex in range(len(g.vs())):
+    #     calculate_node_weight(vertex)
+    # print("Saving new graph with node weights to file, so that we don't have to do this again.")
+    # g.save(r'graphFiles/nyc_graph_3_unitsPerNode.graphml', format='graphml')
 
     print("Loading newly created graphml, now with 'UnitsWithinQuarterMile' as an available attribute.")
     g = nx.read_graphml(r'graphFiles/nyc_graph_3_unitsPerNode.graphml')
@@ -80,9 +80,9 @@ if __name__ == '__main__':
         G.nodes[node[0]]['UnitsWithinQuarterMile'] = node[1]['UnitsWithinQuarterMile']
 
     print("Now generating a heatmap showing residential units within "
-          "a half-mile's walking distance of every intersection in Manhattan.")
+          "a quarter-mile's walking distance of every intersection in Manhattan.")
     nyc_graph = G
-    nc = ox.plot.get_node_colors_by_attr(nyc_graph, 'UnitsWithinQuarterMile', cmap='hot_r', start=0, stop=.75)
+    nc = ox.plot.get_node_colors_by_attr(nyc_graph, 'UnitsWithinQuarterMile', cmap='hot_r', start=0, stop=1)
     ox.plot_graph(nyc_graph, node_size=1, node_color=nc, save=True,
                   filepath='imageFiles/ManhattanIntersectionHeatmap.png', dpi=800)
     print("Done!")

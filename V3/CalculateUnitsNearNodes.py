@@ -1,5 +1,6 @@
 from igraph import *
 import ast
+import pandas as pd
 import numpy as np
 import networkx as nx
 import osmnx as ox
@@ -72,12 +73,19 @@ if __name__ == '__main__':
             G.add_edge(u, v, weight=w)
             G[u][v][0]['geometry'] = wkt.loads(data['geometry'])
 
+    # Initializa dataframe for data export    
+    df = pd.DataFrame(columns = ['data'])
+
     for node in nyc_graph.nodes(data=True):
-        print(" Fixing node:", node)
+        print("Fixing node: ", node, "\n")
         G.nodes[node[0]]['geometry'] = wkt.loads(node[1]['geometry'])
         G.nodes[node[0]]['x'] = G.nodes[node[0]]['geometry'].x
         G.nodes[node[0]]['y'] = G.nodes[node[0]]['geometry'].y
         G.nodes[node[0]]['UnitsWithinQuarterMile'] = node[1]['UnitsWithinQuarterMile']
+        df = df.append({'data': str(node)}, ignore_index = True)
+
+    # Export data for interactive visualization in R
+    df.to_csv("graphFiles/nyc_graph_3_unitsPerNode.csv")
 
     print("Now generating a heatmap showing residential units within "
           "a quarter-mile's walking distance of every intersection in Manhattan.")
